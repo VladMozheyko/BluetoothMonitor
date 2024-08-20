@@ -4,25 +4,23 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
 
-//тип 6 GrafElement_t6 - Равнобедренный треугольник - интерактивный, реагирует на касания - кнопка;
-//
-//1. GrafTouch_t5(int numberVar, String[] nameVar, int length, int width, int coordX, int coordY, int colorVar, int colorActiv, int positTriang)
-//2. Имя элемента nameVar, не выводится, может быть пустым;
-//3. Катет в пикселях - length;  // размеры
-//4. Гипотенуза в пикселях -width;  // размеры
-//5. Координата Х в пикселях - coordX;
-//6. Координата У в пикселях - coordY;
-//7. Номер цвета пассивного состояния - colorVar;
-//8. Номер цвета активного состояния - colorActiv;
-//9. Тип размещения - positTriang:  1 - "+", 2 -"-", в массиве bitMassivOutVars[] по номеру numberVar в
-//соответствующем бите должен устанавливать значение, соответствующее нажатию(касанию);
-
 public class Type6 extends GraphElement {
-    public int positTriang;
+    private int rotationAngle;
 
-    public Type6(int numberVar, String[] nameVar, int length, int width, int coordX, int coordY, int colorIndex1, int colorIndex2, int[] globalColorArray, int positTriang) {
+    // Конструктор класса
+    public Type6(int numberVar, String[] nameVar, int length, int width, int coordX, int coordY, int colorIndex1, int colorIndex2, int[] globalColorArray, int rotationCode) {
         super(numberVar, nameVar, length, width, coordX, coordY, colorIndex1, colorIndex2, globalColorArray);
-        this.positTriang = positTriang;
+        this.rotationAngle = convertToRotationAngle(rotationCode);
+    }
+
+    private int convertToRotationAngle(int angleCode) {
+        switch (angleCode) {
+            case 1: return 0;
+            case 2: return 90;
+            case 3: return 180;
+            case 4: return 270;
+            default: return 0; // любое другое значение даст позицию 0
+        }
     }
 
     @Override
@@ -30,20 +28,20 @@ public class Type6 extends GraphElement {
         Paint paint = new Paint();
         paint.setColor(bitMassivInVars[numberVar] ? getColorByIndex(colorIndex2) : getColorByIndex(colorIndex1));
 
-        float rotationAngle = positTriang * 45;
-
-        // Сохраняем текущие параметры канваса
-        canvas.save();
-
-        // Поворачиваем канвас вокруг центра треугольника
-        canvas.rotate(rotationAngle, coordX + length / 2, coordY + width / 2);
-
         // Создаем массив точек треугольника
         float[] points = {
                 coordX, coordY,
                 coordX + length, coordY,
-                coordX + length / 2, positTriang % 2 == 0 ? coordY - width : coordY + width
+                coordX + length / 2f, coordY - width
         };
+        // находим центр треугольника
+        float centerX = coordX + length / 2f;
+        float centerY = coordY + width / 2f;
+
+        // Сохраняем текущие параметры канваса
+        canvas.save();
+
+        canvas.rotate(rotationAngle, centerX, centerY); // повернули канву
 
         canvas.drawPath(createPath(points), paint);
 
@@ -59,4 +57,3 @@ public class Type6 extends GraphElement {
         return path;
     }
 }
-
